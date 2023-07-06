@@ -50,7 +50,8 @@ class movieController {
         throw { name: "not found", message: "Movie not found" };
       }
       const trailer = await getTrailer(movie);
-      movie.trailer = trailer;
+      movie.trailer = trailer.slice(trailer.indexOf("=") + 1);
+      movie.trailer = `https://www.youtube.com/embed/${movie.trailer}?autoplay=0&fs=0&iv_load_policy=3&showinfo=0&rel=0&cc_load_policy=0&start=0&end=0&origin=http://youtubeembedcode.com`;
       res.status(200).json(movie);
     } catch (err) {
       next(err);
