@@ -45,11 +45,11 @@ async function getTrailer(movie) {
     const year = movie.release_date.slice(0, 4);
     let query = `${name} ${year} trailer`;
 
-    const getTrailer = await axios.get(
+    const youtubeSearch = await axios.get(
       `https://youtube.googleapis.com/youtube/v3/search?part=snippet&maxResults=25&q=${query}&key=${process.env.YOUTUBE_API_KEY}`
     );
 
-    const embedLink = `https://www.youtube.com/embed/${getTrailer.data.items[0].id.videoId}?autoplay=0&fs=0&iv_load_policy=3&showinfo=0&rel=0&cc_load_policy=0&start=0&end=0&origin=http://youtubeembedcode.com`;
+    const embedLink = `https://www.youtube.com/embed/${youtubeSearch.data.items[0].id.videoId}?autoplay=0&fs=0&iv_load_policy=3&showinfo=0&rel=0&cc_load_policy=0&start=0&end=0&origin=http://youtubeembedcode.com`;
 
     return embedLink;
   } catch (err) {
