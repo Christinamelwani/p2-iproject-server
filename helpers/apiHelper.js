@@ -12,13 +12,14 @@ async function searchMovies(query, page) {
     return err;
   }
 }
-async function discoverMovies(sort, page) {
+
+async function discoverMovies(page) {
   try {
     const baseImgUrl = "https://image.tmdb.org/t/p/w1280/";
     const api_key = "b9d4f31633d3e1a560efbacde8f4ef60";
     let language = "en-US";
     const findMovie = await axios.get(
-      `https://api.themoviedb.org/3/discover/movie?api_key=${api_key}&language=${language}&sort_by=${sort}.desc&include_adult=false&include_video=false&page=${page}&with_watch_monetization_types=flatrate
+      `https://api.themoviedb.org/3/discover/movie?api_key=${api_key}&language=${language}&s}.desc&include_adult=false&include_video=false&page=${page}&with_watch_monetization_types=flatrate
        `
     );
 
@@ -54,20 +55,11 @@ async function getTrailer(movie) {
     const getTrailer = await axios.get(
       `https://youtube.googleapis.com/youtube/v3/search?part=snippet&maxResults=25&q=${query}&key=${api_key}`
     );
-    const url = `https://www.youtube.com/watch?v=`;
-    return url + getTrailer.data.items[0].id.videoId;
+
+    return `https://www.youtube.com/embed/${getTrailer.data.items[0].id.videoId}?autoplay=0&fs=0&iv_load_policy=3&showinfo=0&rel=0&cc_load_policy=0&start=0&end=0&origin=http://youtubeembedcode.com`;
   } catch (err) {
     return err;
   }
-}
-async function test() {
-  const results = await searchMovies("taxi driver");
-  const found = results[0];
-  const name = found.original_title;
-  const year = found.release_date.slice(0, 4);
-  let query = `${name} ${year} trailer`;
-  const video = await getTrailer(query);
-  return video;
 }
 
 module.exports = { searchMovies, discoverMovies, getTrailer, getDetails };

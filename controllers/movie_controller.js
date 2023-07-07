@@ -1,82 +1,67 @@
-const axios = require("axios");
+const { truncateMovieList } = require("../helpers/truncateMovieList");
 const {
   searchMovies,
   getDetails,
   discoverMovies,
   getTrailer,
 } = require("../helpers/apiHelper");
-class movieController {
-  static test(req, res, next) {
-    res.status(200).json({ message: "Server berfungsi" });
-  }
 
+class movieController {
   static async getMainFeed(req, res, next) {
     try {
       let movieList = [];
-      let { sort, page, query } = req.query;
-      if (!sort) {
-        sort = "popularity";
-      }
+
+      let { page, query } = req.query;
+
       if (!page) {
         page = 1;
       }
-      if (!query) {
-        movieList = await discoverMovies(sort, page);
-      } else {
+
+      if (query) {
         movieList = await searchMovies(query, page);
+      } else {
+        movieList = await discoverMovies(page);
       }
-      const modifiedMovieList = [];
-      movieList.results.forEach((el) => {
-        modifiedMovieList.push({
-          title: el.title,
-          id: el.id,
-          overview: el.overview,
-          poster_path: el.poster_path,
-          release_date: el.release_date,
-          original_language: el.original_language,
-        });
-      });
-      movieList.results = modifiedMovieList;
+
+      movieList.results = truncateMovieList(movieList.results);
+
       res.status(200).json(movieList);
     } catch (err) {
       next(err);
     }
   }
+
   static async getDetails(req, res, next) {
     try {
       let { id } = req.params;
+
       const movie = await getDetails(id);
+
       if (movie.response) {
         throw { name: "not found", message: "Movie not found" };
       }
-      const trailer = await getTrailer(movie);
-      movie.trailer = trailer.slice(trailer.indexOf("=") + 1);
-      movie.trailer = `https://www.youtube.com/embed/${movie.trailer}?autoplay=0&fs=0&iv_load_policy=3&showinfo=0&rel=0&cc_load_policy=0&start=0&end=0&origin=http://youtubeembedcode.com`;
+
+      movie.trailer = await getTrailer(movie);
+
       res.status(200).json(movie);
     } catch (err) {
       next(err);
     }
   }
+
   static async searchMovies(req, res, next) {
     try {
       let { query } = req.params;
       let { page } = req.body;
+
       if (!page) {
         page = 1;
       }
+
       const movieList = await searchMovies(query, page);
-      const modifiedMovieList = [];
-      movieList.results.forEach((el) => {
-        modifiedMovieList.push({
-          title: el.title,
-          id: el.id,
-          overview: el.overview,
-          poster_path: el.poster_path,
-          release_date: el.release_date,
-          original_language: el.original_language,
-        });
-      });
-      movieList.results = modifiedMovieList;
+
+      movieList.results = truncateMovieList(movieList.results);
+
       res.status(200).json(movieList);
     } catch (err) {
       next(err);
